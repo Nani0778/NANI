@@ -37,19 +37,19 @@ desp_dict = {'rcc': ['RClone is a command-line program to sync files and directo
             'mremname': ['Mirror Filename Remname is combination of Regex(s) used for removing or manipulating Filename of the Mirrored/Cloned Files', 'Send Mirror Filename Remname. \n<b>Timeout:</b> 60 sec'],
             'thumb': ['Custom Thumbnail to appear on the Leeched files uploaded by the bot', 'Send a photo to save it as custom thumbnail. \n<b>Alternatively: </b><code>/cmd [photo] -s thumb</code> \n<b>Timeout:</b> 60 sec'],
             'yt_opt': ['YT-DLP Options is the Custom Quality for the extraction of videos from the yt-dlp supported sites.', 'Send YT-DLP Options. Timeout: 60 sec\nFormat: key:value|key:value|key:value.\nExample: format:bv*+mergeall[vcodec=none]|nocheckcertificate:True\nCheck all yt-dlp api options from this <a href="https://github.com/yt-dlp/yt-dlp/blob/master/yt_dlp/YoutubeDL.py#L184">FILE</a> to convert cli arguments to api options.'],
-            'du_opt': ['later.', 'later.'],
             'usess': [f'User Session is Telegram Session used to Download Private Contents from Private Channels with no compromise in Privacy, Build with Encryption.\n{"<b>Warning:</b> This Bot is not secured. We recommend asking the group owner to set the Upstream repo to the Official repo. If it is not the official repo, then WZML-X is not responsible for any issues that may occur in your account." if config_dict["UPSTREAM_REPO"] != "https://github.com/weebzone/WZML-X" else "Bot is Secure. You can use the session securely."}', 'Send your Session String.\n<b>Timeout:</b> 60 sec'],
-            'usess_key': [f'User Session is Telegram Session used to Download Private Contents from Private Channels with no compromise in Privacy, Build with Encryption.\n{"<b>Warning:</b> This Bot is not secured. We recommend asking the group owner to set the Upstream repo to the Official repo. If it is not the official repo, then WZML-X is not responsible for any issues that may occur in your account." if config_dict["UPSTREAM_REPO"] != "https://github.com/weebzone/WZML-X" else "Bot is Secure. You can use the session securely."}', 'Send your Session String.\n<b>Timeout:</b> 60 sec'],
             'split_size': ['Leech Splits Size is the size to split the Leeched File before uploading', f'Send Leech split size in any comfortable size, like 2Gb, 500MB or 1.46gB. \n<b>PREMIUM ACTIVE:</b> {IS_PREMIUM_USER}. \n<b>Timeout:</b> 60 sec'],
             'ddl_servers': ['DDL Servers which uploads your File to their Specific Hosting', ''],
             'user_tds': [f'UserTD helps to Upload files via Bot to your Custom Drive Destination via Global SA mail\n\n➲ <b>SA Mail :</b> {"Not Specified" if "USER_TD_SA" not in config_dict else config_dict["USER_TD_SA"]}', 'Send User TD details for Use while Mirror/Clone\n➲ <b>Format:</b>\nname id/link index(optional)\nname2 link2/id2 index(optional)\n\n<b>NOTE:</b>\n<i>1. Drive ID must be valid, then only it will accept\n2. Names can have spaces\n3. All UserTDs are updated on every change\n4. To delete specific UserTD, give Name(s) separated by each line</i>\n\n<b>Timeout:</b> 60 sec'],
             'gofile': ['Gofile is a free file sharing and storage platform. You can store and share your content without any limit.', "Send GoFile's API Key. Get it on https://gofile.io/myProfile, It will not be Accepted if the API Key is Invalid !!\n<b>Timeout:</b> 60 sec"],
             'streamtape': ['Streamtape is free Video Streaming & sharing Hoster', "Send StreamTape's Login and Key\n<b>Format:</b> <code>user_login:pass_key</code>\n<b>Timeout:</b> 60 sec"],
+            'lmeta': ['Your channel name that will be used while editing metadata of the video file', 'Send Metadata Text For Leeching Files.'],
             }
 fname_dict = {'rcc': 'RClone',
              'lprefix': 'Prefix',
              'lsuffix': 'Suffix',
              'lremname': 'Remname',
+             'lmeta': 'Metadata',
              'mprefix': 'Prefix',
              'msuffix': 'Suffix',
              'mremname': 'Remname',
@@ -57,9 +57,7 @@ fname_dict = {'rcc': 'RClone',
              'lcaption': 'Caption',
              'thumb': 'Thumbnail',
              'yt_opt': 'YT-DLP Options',
-             'du_opt': 'Default Upload',
              'usess': 'User Session',
-             'usess_key': 'User Session Key',
              'split_size': 'Leech Splits',
              'ddl_servers': 'DDL Servers',
              'user_tds': 'User Custom TDs',
@@ -72,7 +70,7 @@ async def get_user_settings(from_user, key=None, edit_type=None, edit_mode=None)
     name = from_user.mention(style="html")
     buttons = ButtonMaker()
     thumbpath = f"Thumbnails/{user_id}.jpg"
-    rclone_path = f'rclone/{user_id}.conf'
+    rclone_path = f'wcl/{user_id}.conf'
     user_dict = user_data.get(user_id, {})
     if key is None:
         buttons.ibutton("Universal Settings", f"userset {user_id} universal")
@@ -90,13 +88,6 @@ async def get_user_settings(from_user, key=None, edit_type=None, edit_mode=None)
         buttons.ibutton(f"{'✅️' if ytopt != 'Not Exists' else ''} YT-DLP Options", f"userset {user_id} yt_opt")
         u_sess = 'Exists' if user_dict.get('usess', False) else 'Not Exists'
         buttons.ibutton(f"{'✅️' if u_sess != 'Not Exists' else ''} User Session", f"userset {user_id} usess")
-
-        u_sess_key = 'Exists' if user_dict.get('usesskey', False) else 'Not Exists'
-        buttons.ibutton(f"{'✅️' if u_sess_key != 'Not Exists' else ''} User Session key", f"userset {user_id} usesskey")
-
-        duopt = 'Not Set' if (val:=user_dict.get('du_opt', config_dict.get('DEFAULT_UPLOAD', ''))) == 'None' else val
-        buttons.ibutton(f"DU Options", f"userset {user_id} du_opt")
-
         bot_pm = "Enabled" if user_dict.get('bot_pm', config_dict['BOT_PM']) else "Disabled"
         buttons.ibutton('Disable Bot PM' if bot_pm == 'Enabled' else 'Enable Bot PM', f"userset {user_id} bot_pm")
         if config_dict['BOT_PM']:
@@ -105,13 +96,8 @@ async def get_user_settings(from_user, key=None, edit_type=None, edit_mode=None)
         buttons.ibutton('Disable MediaInfo' if mediainfo == 'Enabled' else 'Enable MediaInfo', f"userset {user_id} mediainfo")
         if config_dict['SHOW_MEDIAINFO']:
             mediainfo = "Force Enabled"
-            
         save_mode = "Save As Dump" if user_dict.get('save_mode') else "Save As BotPM"
         buttons.ibutton('Save As BotPM' if save_mode == 'Save As Dump' else 'Save As Dump', f"userset {user_id} save_mode")
-        
-        list_mode = "Telegraph" if not user_dict.get('list_mode') else "Telegram Direct"
-        buttons.ibutton('List as Tdirect' if list_mode == 'Telegraph' else 'List as Tgraph', f"userset {user_id} list_mode")
-        
         dailytl = config_dict['DAILY_TASK_LIMIT'] or "∞"
         dailytas = user_dict.get('dly_tasks')[1] if user_dict and user_dict.get('dly_tasks') and user_id != OWNER_ID and config_dict['DAILY_TASK_LIMIT'] else config_dict['DAILY_TASK_LIMIT'] or "️∞" if user_id != OWNER_ID else "∞"
         if user_dict.get('dly_tasks', False):
@@ -119,7 +105,7 @@ async def get_user_settings(from_user, key=None, edit_type=None, edit_mode=None)
             lastused = f"{t[0]}h {t[1]}m {t[2].split('.')[0]}s ago"
         else: lastused = "Bot Not Used yet.."
 
-        text = BotTheme('UNIVERSAL', NAME=name, YT=escape(ytopt), DT=f"{dailytas} / {dailytl}", LAST_USED=lastused, BOT_PM=bot_pm, MEDIAINFO=mediainfo, SAVE_MODE=save_mode, LIST_MODE=list_mode, USESS=u_sess, DU=duopt, USESS_KEY=u_sess_key)
+        text = BotTheme('UNIVERSAL', NAME=name, YT=escape(ytopt), DT=f"{dailytas} / {dailytl}", LAST_USED=lastused, BOT_PM=bot_pm, MEDIAINFO=mediainfo, SAVE_MODE=save_mode, USESS=u_sess)
         buttons.ibutton("Back", f"userset {user_id} back", "footer")
         buttons.ibutton("Close", f"userset {user_id} close", "footer")
         button = buttons.build_menu(2)
@@ -133,23 +119,23 @@ async def get_user_settings(from_user, key=None, edit_type=None, edit_mode=None)
 
         buttons.ibutton("Mirror Suffix", f"userset {user_id} msuffix")
         msuffix = 'Not Exists' if (val:=user_dict.get('msuffix', config_dict.get('MIRROR_FILENAME_SUFFIX', ''))) == '' else val
-            
+
         buttons.ibutton("Mirror Remname", f"userset {user_id} mremname")
         mremname = 'Not Exists' if (val:=user_dict.get('mremname', config_dict.get('MIRROR_FILENAME_REMNAME', ''))) == '' else val
 
         ddl_serv = len(val) if (val := user_dict.get('ddl_servers', False)) else 0
         buttons.ibutton("DDL Servers", f"userset {user_id} ddl_servers")
-        
+
         tds_mode = "Enabled" if user_dict.get('td_mode', False) else "Disabled"
         if not config_dict['USER_TD_MODE']:
             tds_mode = "Force Disabled"
-        
+
         user_tds = len(val) if (val := user_dict.get('user_tds', False)) else 0
         buttons.ibutton("User TDs", f"userset {user_id} user_tds")
 
         text = BotTheme('MIRROR', NAME=name, RCLONE=rccmsg, DDL_SERVER=ddl_serv, DM=f"{dailyup} / {dailytlup}", MREMNAME=escape(mremname), MPREFIX=escape(mprefix),
                 MSUFFIX=escape(msuffix), TMODE=tds_mode, USERTD=user_tds)
-        
+
         buttons.ibutton("Back", f"userset {user_id} back", "footer")
         buttons.ibutton("Close", f"userset {user_id} close", "footer")
         button = buttons.build_menu(2)
@@ -187,11 +173,14 @@ async def get_user_settings(from_user, key=None, edit_type=None, edit_mode=None)
         buttons.ibutton("Leech Dump", f"userset {user_id} ldump")
         ldump = 'Not Exists' if (val:=user_dict.get('ldump', '')) == '' else len(val)
 
+        lmeta = 'Not Exists' if (val:=user_dict.get('lmeta', config_dict.get('METADATA', ''))) == '' else val
+        buttons.ibutton(f"{'✅️' if lmeta != 'Not Exists' else ''} Metadata Text", f"userset {user_id} lmeta")
+                
         text = BotTheme('LEECH', NAME=name, DL=f"{dailyll} / {dailytlle}",
                 LTYPE=ltype, THUMB=thumbmsg, SPLIT_SIZE=split_size,
                 EQUAL_SPLIT=equal_splits, MEDIA_GROUP=media_group,
                 LCAPTION=escape(lcaption), LPREFIX=escape(lprefix),
-                LSUFFIX=escape(lsuffix), LDUMP=ldump, LREMNAME=escape(lremname))
+                LSUFFIX=escape(lsuffix), LDUMP=ldump, LREMNAME=escape(lremname), LMETA=escape(lmeta))
 
         buttons.ibutton("Back", f"userset {user_id} back", "footer")
         buttons.ibutton("Close", f"userset {user_id} close", "footer")
@@ -222,18 +211,8 @@ async def get_user_settings(from_user, key=None, edit_type=None, edit_mode=None)
         elif key == 'yt_opt':
             set_exist = 'Not Exists' if (val:=user_dict.get('yt_opt', config_dict.get('YT_DLP_OPTIONS', ''))) == '' else val
             text += f"➲ <b>YT-DLP Options :</b> <code>{escape(set_exist)}</code>\n\n"
-
-
-        elif key == 'du_opt':
-            set_exist = 'Not Set' if (val:=user_dict.get('du_opt', config_dict.get('DEFAULT_UPLOAD', ''))) == 'None' else val
-            text += f"➲ <b>Default Upload Options :</b> <code>{set_exist}</code>\n\n"
-
-
         elif key == 'usess':
             set_exist = 'Exists' if user_dict.get('usess') else 'Not Exists'
-            text += f"➲ <b>{fname_dict[key]} :</b> <code>{set_exist}</code>\n➲ <b>Encryption :</b> {'🔐' if set_exist else '🔓'}\n\n"
-        elif key == 'usess_key':
-            set_exist = 'Exists' if user_dict.get('usess_key') else 'Not Exists'
             text += f"➲ <b>{fname_dict[key]} :</b> <code>{set_exist}</code>\n➲ <b>Encryption :</b> {'🔐' if set_exist else '🔓'}\n\n"
         elif key == 'split_size':
             set_exist = get_readable_file_size(config_dict['LEECH_SPLIT_SIZE']) + ' (Default)' if user_dict.get('split_size', '') == '' else get_readable_file_size(user_dict['split_size'])
@@ -246,7 +225,7 @@ async def get_user_settings(from_user, key=None, edit_type=None, edit_mode=None)
                 buttons.ibutton("Disable Media Group", f"userset {user_id} mgroup", "header")
             else:
                 buttons.ibutton("Enable Media Group", f"userset {user_id} mgroup", "header")
-        elif key in ['lprefix', 'lremname', 'lsuffix', 'lcaption', 'ldump']:
+        elif key in ['lprefix', 'lremname', 'lsuffix', 'lcaption', 'ldump', 'lmeta']:
             set_exist = 'Not Exists' if (val:=user_dict.get(key, config_dict.get(f'LEECH_FILENAME_{key[1:].upper()}', ''))) == '' else val
             if set_exist != 'Not Exists' and key == "ldump":
                 set_exist = '\n\n' + '\n'.join([f"{index}. <b>{dump}</b> : <code>{ids}</code>" for index, (dump, ids) in enumerate(val.items(), start=1)])
@@ -300,7 +279,7 @@ async def user_settings(client, message):
         if set_arg and (reply_to := message.reply_to_message):
             if message.from_user.id != reply_to.from_user.id:
                 return await editMessage(msg, '<i>Reply to Your Own Message for Setting via Args Directly</i>')
-            if set_arg in ['lprefix', 'lsuffix', 'lremname', 'lcaption', 'ldump', 'yt_opt', 'du_opt'] and reply_to.text:
+            if set_arg in ['lprefix', 'lsuffix', 'lremname', 'lcaption', 'ldump', 'yt_opt', 'lmeta'] and reply_to.text:
                 return await set_custom(client, reply_to, msg, set_arg, True)
             elif set_arg == 'thumb' and reply_to.media:
                 return await set_thumb(client, reply_to, msg, set_arg, True)
@@ -315,12 +294,12 @@ async def user_settings(client, message):
     /cmd -s lsuffix
 ➲ <b>Leech Filename Remname :</b>
     /cmd -s lremname
+➲ <b>Leech Metadata Text :</b>
+    /cmd -s lmeta
 ➲ <b>Leech Filename Caption :</b>
     /cmd -s lcaption
 ➲ <b>YT-DLP Options :</b>
     /cmd -s yt_opt
-➲ <b>YT-DLP Options :</b>
-    /cmd -s du_opt
 ➲ <b>Leech User Dump :</b>
     /cmd -s ldump''')
     else:
@@ -379,7 +358,7 @@ async def set_custom(client, message, pre_event, key, direct=False):
             if len(dump_info) > 1 and (dump_chat := await chat_info(dump_info[1])):
                 ldumps[dump_info[0]] = dump_chat.id
         value = ldumps
-    elif key in ['yt_opt', 'usess', 'du_opt']:
+    elif key in ['yt_opt', 'usess']:
         if key == 'usess':
             password = Fernet.generate_key()
             try:
@@ -416,12 +395,12 @@ async def set_thumb(client, message, pre_event, key, direct=False):
 async def add_rclone(client, message, pre_event):
     user_id = message.from_user.id
     handler_dict[user_id] = False
-    path = f'{getcwd()}/rclone/'
+    path = f'{getcwd()}/wcl/'
     if not await aiopath.isdir(path):
         await mkdir(path)
     des_dir = ospath.join(path, f'{user_id}.conf')
     await message.download(file_name=des_dir)
-    update_user_ldata(user_id, 'rclone', f'rclone/{user_id}.conf')
+    update_user_ldata(user_id, 'rclone', f'wcl/{user_id}.conf')
     await deleteMessage(message)
     await update_user_settings(pre_event, 'rcc', 'mirror')
     if DATABASE_URL:
@@ -476,7 +455,7 @@ async def edit_user_settings(client, query):
     message = query.message
     data = query.data.split()
     thumb_path = f'Thumbnails/{user_id}.jpg'
-    rclone_path = f'rclone/{user_id}.conf'
+    rclone_path = f'wcl/{user_id}.conf'
     user_dict = user_data.get(user_id, {})
     if user_id != int(data[1]):
         await query.answer("Not Yours!", show_alert=True)
@@ -530,7 +509,7 @@ async def edit_user_settings(client, query):
         pfunc = partial(set_thumb, pre_event=query, key=data[2])
         rfunc = partial(update_user_settings, query, data[2], 'leech')
         await event_handler(client, query, pfunc, rfunc, True)
-    elif data[2] in ['yt_opt', 'usess', 'du_opt']:
+    elif data[2] in ['yt_opt', 'usess']:
         await query.answer()
         edit_mode = len(data) == 4
         await update_user_settings(query, data[2], 'universal', edit_mode)
@@ -545,7 +524,7 @@ async def edit_user_settings(client, query):
         await update_user_settings(query, data[2][1:], 'universal')
         if DATABASE_URL:
             await DbManger().update_user_data(user_id)
-    elif data[2] in ['bot_pm', 'mediainfo', 'save_mode', 'list_mode', 'td_mode']:
+    elif data[2] in ['bot_pm', 'mediainfo', 'save_mode', 'td_mode']:
         handler_dict[user_id] = False
         if data[2] == 'save_mode' and not user_dict.get(data[2], False) and not user_dict.get('ldump'):
             return await query.answer("Set User Dump first to Change Save Msg Mode !", show_alert=True)
@@ -636,7 +615,7 @@ async def edit_user_settings(client, query):
         pfunc = partial(set_custom, pre_event=query, key=data[2])
         rfunc = partial(update_user_settings, query, data[2], 'mirror' if data[2] in ['ddl_servers', 'user_tds'] else "ddl_servers")
         await event_handler(client, query, pfunc, rfunc)
-    elif data[2] in ['lprefix', 'lsuffix', 'lremname', 'lcaption', 'ldump', 'mprefix', 'msuffix', 'mremname']:
+    elif data[2] in ['lprefix', 'lsuffix', 'lremname', 'lcaption', 'ldump', 'mprefix', 'msuffix', 'mremname', 'lmeta']:
         handler_dict[user_id] = False
         await query.answer()
         edit_mode = len(data) == 4
@@ -646,7 +625,7 @@ async def edit_user_settings(client, query):
         pfunc = partial(set_custom, pre_event=query, key=data[2])
         rfunc = partial(update_user_settings, query, data[2], return_key)
         await event_handler(client, query, pfunc, rfunc)
-    elif data[2] in ['dlprefix', 'dlsuffix', 'dlremname', 'dlcaption', 'dldump']:
+    elif data[2] in ['dlprefix', 'dlsuffix', 'dlremname', 'dlcaption', 'dldump', 'dlmeta']:
         handler_dict[user_id] = False
         await query.answer()
         update_user_ldata(user_id, data[2][1:], {} if data[2] == 'dldump' else '')
@@ -694,7 +673,7 @@ async def edit_user_settings(client, query):
         user_id = int(data[3])
         await query.answer()
         thumb_path = f'Thumbnails/{user_id}.jpg'
-        rclone_path = f'rclone/{user_id}.conf'
+        rclone_path = f'wcl/{user_id}.conf'
         if await aiopath.exists(thumb_path):
             await aioremove(thumb_path)
         if await aiopath.exists(rclone_path):
@@ -727,7 +706,7 @@ async def send_users_settings(client, message):
             msg += f'\n\n<code>{user}</code>:'
             if data:
                 for key, value in data.items():
-                    if key in ['token', 'time', 'ddl_servers', 'usess', 'usess_key']:
+                    if key in ['token', 'time', 'ddl_servers', 'usess']:
                         continue
                     msg += f'\n<b>{key}</b>: <code>{escape(str(value))}</code>'
             else:
@@ -746,7 +725,7 @@ async def send_users_settings(client, message):
             buttons.ibutton("Close", f"userset {message.from_user.id} close")
             button = buttons.build_menu(1)
             for key, value in data.items():
-                if key in ['token', 'time', 'ddl_servers', 'usess', 'usess_key']:
+                if key in ['token', 'time', 'ddl_servers', 'usess']:
                     continue
                 msg += f'\n<b>{key}</b>: <code>{escape(str(value))}</code>'
         else:
