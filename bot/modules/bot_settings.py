@@ -1,3 +1,4 @@
+#Tg
 #!/usr/bin/env python3
 from random import choice
 from pyrogram.handlers import MessageHandler, CallbackQueryHandler
@@ -144,10 +145,6 @@ async def load_config():
     JIODRIVE_TOKEN = environ.get('JIODRIVE_TOKEN', '')
     if len(JIODRIVE_TOKEN) == 0:
         JIODRIVE_TOKEN = ''
-        
-    ALL_DEBRID_API = environ.get('ALL_DEBRID_API', '')
-    if len(ALL_DEBRID_API) == 0:
-        ALL_DEBRID_API = ''
 
     REAL_DEBRID_API = environ.get('REAL_DEBRID_API', '')
     if len(REAL_DEBRID_API) == 0:
@@ -284,11 +281,7 @@ async def load_config():
 
     INCOMPLETE_TASK_NOTIFIER = environ.get('INCOMPLETE_TASK_NOTIFIER', '')
     INCOMPLETE_TASK_NOTIFIER = INCOMPLETE_TASK_NOTIFIER.lower() == 'true'
-    
-    RESUME_INCOMPLETE_TASKS = environ.get('RESUME_INCOMPLETE_TASKS', '')
-    RESUME_INCOMPLETE_TASKS = RESUME_INCOMPLETE_TASKS.lower() == 'true'
-    
-    if not INCOMPLETE_TASK_NOTIFIER and not RESUME_INCOMPLETE_TASKS and DATABASE_URL:
+    if not INCOMPLETE_TASK_NOTIFIER and DATABASE_URL:
         await DbManger().trunc_table('tasks')
 
     STOP_DUPLICATE = environ.get('STOP_DUPLICATE', '')
@@ -543,7 +536,7 @@ async def load_config():
 
 <b>Story Line:</b> {synopsis}
 
-<a href='{url}'>Read More ...</a>'''
+<a href='{url}'>Read More ..</a>'''
     
     TIMEZONE = environ.get('TIMEZONE', '')
     if len(TIMEZONE) == 0:
@@ -605,7 +598,6 @@ async def load_config():
                         'CAP_FONT': CAP_FONT,
                         'CMD_SUFFIX': CMD_SUFFIX,
                         'DATABASE_URL': DATABASE_URL,
-                        'ALL_DEBRID_API': ALL_DEBRID_API,
                         'REAL_DEBRID_API': REAL_DEBRID_API,
                         'DEBRID_LINK_API': DEBRID_LINK_API,
                         'FILELION_API': FILELION_API,
@@ -649,7 +641,6 @@ async def load_config():
                         'EXTENSION_FILTER': EXTENSION_FILTER,
                         'GDRIVE_ID': GDRIVE_ID,
                         'INCOMPLETE_TASK_NOTIFIER': INCOMPLETE_TASK_NOTIFIER,
-                        'RESUME_INCOMPLETE_TASKS': RESUME_INCOMPLETE_TASKS,
                         'INDEX_URL': INDEX_URL,
                         'IS_TEAM_DRIVE': IS_TEAM_DRIVE,
                         'LEECH_FILENAME_PREFIX': LEECH_FILENAME_PREFIX,
@@ -1039,7 +1030,7 @@ async def update_private_file(_, message, pre_message):
             await sendMessage(message, msg, buttons.build_menu(2))
         else:
             await deleteMessage(message)
-    if file_name == 'rclone.conf':
+    if file_name == 'wcl.conf':
         await rclone_serve_booter()
     await update_buttons(pre_message)
     if DATABASE_URL:
@@ -1291,6 +1282,6 @@ async def bot_settings(_, message):
 
 
 bot.add_handler(MessageHandler(bot_settings, filters=command(
-    BotCommands.BotSetCommand) & CustomFilters.sudo))
+    BotCommands.BotSetCommand) & CustomFilters.owner))
 bot.add_handler(CallbackQueryHandler(edit_bot_settings,
-                filters=regex("^botset") & CustomFilters.sudo))
+                filters=regex("^botset") & CustomFilters.owner))
